@@ -1,0 +1,35 @@
+spring:
+  rabbitmq:
+    host: www.lizhiyu.xyz
+    port: 5672
+    username: admin
+    password: admin
+    #----旧版本的支持发布确认配置 (生产者到交换机--confirmCallback)
+    #publisher-confirms: true
+    #----新版的支持发布确认配置 (生产者到交换机--confirmCallback)
+    #NONE值是禁用发布确认模式，是默认值，CORRELATED值是发布消息成功到交换器后会触发回调方法
+    spring.rabbitmq.publisher-confirm-type: correlated
+    #支持发布返回 (交换机到队列方法开启-----------returnCallback)
+    publisher-returns: true   #支持发布返回
+    template:
+      #为true,则交换机处理消息到路由失败，则会返回给生产者
+      mandatory: true
+    listener:
+      #当使用topic类型交换机的时候、发送消息时候指定了交换机名称(会用到direct的配置)、RouterKey为路由到指定队列的参数
+      simple: #最常用的一种交换机类型、可以给根据一类RouterKey路由到指定的队列上
+        acknowledge-mode: manual    #acknowledgeMode设置为手动模式(NONE,MANUAL,AUTO)
+        concurrency: 5              #当前监听容器数
+        max-concurrency: 20         #最大数
+        retry: #这个配置仅仅在自动模式 AUTO 下才生效(自动模式如果不抛出异常则代表消费成功)
+          enabled: true             #是否支持重试
+          initial-interval: 3000ms #重试时间间隔
+          max-attempts: 3 #重试次数
+          max-interval: 15000ms #重试最大时间间隔
+      #当发送消息时候没有指定交换机名称(会用到simple的配置)、这时RouterKey则为要发送的队列名
+      direct:
+        acknowledge-mode: manual    #开启手动确认消息,也就是消费者确认消费完才会给让队列删除此信息
+        retry: #这个配置仅仅在自动模式 AUTO 下才生效
+          enabled: true             #是否支持重试
+          initial-interval: 3000ms #重试时间间隔
+          max-attempts: 3 #重试次数
+          max-interval: 15000ms #重试最大时间间隔
